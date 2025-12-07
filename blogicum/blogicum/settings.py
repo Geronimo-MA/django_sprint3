@@ -1,17 +1,11 @@
 from pathlib import Path
 
-LANGUAGE_CODE = 'ru-ru'
-USE_I18N = True
-USE_TZ = True
-
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-57n&hxg!-mbo+z^)iqg3u9h9hs&0=ss^n-o_7&3!#n74u!5)b9'
-
 DEBUG = True
+ALLOWED_HOSTS = ['testserver', 'localhost', '127.0.0.1']
 
-ALLOWED_HOSTS: list = []
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -22,8 +16,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'pages.apps.PagesConfig',
     'blog.apps.BlogConfig',
-    'blog_app.apps.BlogAppConfig',
-
 ]
 
 MIDDLEWARE = [
@@ -54,6 +46,8 @@ TEMPLATES = [
     },
 ]
 
+
+
 WSGI_APPLICATION = 'blogicum.wsgi.application'
 
 DATABASES = {
@@ -64,34 +58,21 @@ DATABASES = {
 }
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-LANGUAGE_CODE = 'ru-ru'
-
+LANGUAGE_CODE = 'ru-RU'
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
-
-USE_L10N = True
-
 USE_TZ = True
 
 STATIC_URL = '/static/'
 
-STATICFILES_DIRS = [
-    BASE_DIR / 'static_files'
-]
+# Оставь так, если у тебя реально есть папка blogicum/static_files
+STATICFILES_DIRS = [BASE_DIR / 'static_files']
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

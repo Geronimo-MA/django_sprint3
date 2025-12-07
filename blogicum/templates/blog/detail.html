@@ -1,12 +1,10 @@
-{% extends "base.html" %}
-{% block title %}
-{{ post.title }} | {% if post.location and post.location.is_published %}{{ post.location.name }} |{% endif %} {{ post.pub_date|date:"d E Y" }}
-{% endblock %}
-{% block content %}
-  <article>
-    <p>{{ post.pub_date|date:"d E Y" }} | {% if post.location and post.location.is_published %}{{ post.location.name }}{% else %}Планета Земля{% endif %}<br>
-      <small>От автора @{{ post.author.username }} в категории {% include "includes/category_link.html" %}</small></p>
-    <h3>{{ post.title }}</h3>
-    <p>{{ post.text|linebreaksbr }}</p>
-  </article> 
-{% endblock %}
+<!doctype html>
+<html lang="ru">
+  <body>
+    <h1>{{ post.title }}</h1>
+    <div>{{ post.text }}</div>
+    <div>{{ post.category.title }}</div>
+    <div>{{ post.category.slug }}</div>
+    <div>{{ post.location.name|default:"Планета Земля" }}</div>
+  </body>
+</html>

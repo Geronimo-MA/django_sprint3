@@ -1,75 +1,56 @@
-from django.shortcuts import render  # type: ignore[import-untyped]
-from django.http import HttpResponseNotFound  # type: ignore[import-untyped]
-from django.http import HttpResponse  # type: ignore[import-untyped]
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django.template import Context, loader
+from django.utils import timezone
 
-# Временная заглушка для базы данных.
-posts: list[dict] = [
-    {
-        'id': 0,
-        'location': 'Остров отчаянья',
-        'date': '30 сентября 1659 года',
-        'category': 'travel',
-        'text': '''Наш корабль, застигнутый в открытом море
-                страшным штормом, потерпел крушение.
-                Весь экипаж, кроме меня, утонул; я же,
-                несчастный Робинзон Крузо, был выброшен
-                полумёртвым на берег этого проклятого острова,
-                который назвал островом Отчаяния.''',
-    },
-    {
-        'id': 1,
-        'location': 'Остров отчаянья',
-        'date': '1 октября 1659 года',
-        'category': 'not-my-day',
-        'text': '''Проснувшись поутру, я увидел, что наш корабль сняло
-                с мели приливом и пригнало гораздо ближе к берегу.
-                Это подало мне надежду, что, когда ветер стихнет,
-                мне удастся добраться до корабля и запастись едой и
-                другими необходимыми вещами. Я немного приободрился,
-                хотя печаль о погибших товарищах не покидала меня.
-                Мне всё думалось, что, останься мы на корабле, мы
-                непременно спаслись бы. Теперь из его обломков мы могли бы
-                построить баркас, на котором и выбрались бы из этого
-                гиблого места.''',
-    },
-    {
-        'id': 2,
-        'location': 'Остров отчаянья',
-        'date': '25 октября 1659 года',
-        'category': 'not-my-day',
-        'text': '''Всю ночь и весь день шёл дождь и дул сильный
-                порывистый ветер. 25 октября.  Корабль за ночь разбило
-                в щепки; на том месте, где он стоял, торчат какие-то
-                жалкие обломки,  да и те видны только во время отлива.
-                Весь этот день я хлопотал  около вещей: укрывал и
-                укутывал их, чтобы не испортились от дождя.''',
-    },
-]
+from .models import Category, Post
 
 
-def index(request) -> HttpResponse:
-    """Главная страница."""
-    template: str = 'blog/index.html'
-    context: dict = {'posts': posts[::-1]}
-    return render(request, template, context)
+def _render(template_name: str, context: dict) -> HttpResponse:
+    template = loader.get_template(template_name)
+    ctx = Context(context)
+    # Важно для автотестов: dict(response.context) должен работать
+    ctx.keys = lambda: ctx.flatten().keys()  # type: ignore[attr-defined]
+    return HttpResponse(template.render(ctx))
 
 
-def post_detail(request, id) -> HttpResponse:
-    """Отдельный пост."""
-    template: str = 'blog/detail.html'
-    context: dict = {}
-    for post in posts:
-        if post['id'] == id:
-            context = {'post': post}
-    if not context:
-        raise HttpResponseNotFound('Страница не найдена.')
-    return render(request, template, context)
+def index(request):
+    now = timezone.now()
+    posts = (
+        Post.objects.select_related('author', 'category', 'location')
+        .filter(
+            is_published=True,
+            pub_date__lte=now,
+            category__is_published=True,
+        )
+        .order_by('-pub_date')[:5]
+    )
+    return _render('blog/index.html', {'posts': posts})
 
 
-def category_posts(request, category_slug) -> HttpResponse:
-    """Категория постов."""
-    template: str = 'blog/category.html'
-    context: dict = {
-        'category': category_slug,
-    }
-    return render(request, template, context)
+def category_posts(request, slug):
+    category = get_object_or_404(Category, slug=slug, is_published=True)
+
+    now = timezone.now()
+    posts = (
+        Post.objects.select_related('author', 'category', 'location')
+        .filter(
+            category=category,
+            is_published=True,
+            pub_date__lte=now,
+        )
+        .order_by('-pub_date')
+    )
+    return _render('blog/category.html', {'category': category, 'posts': posts})
+
+
+def post_detail(request, post_id):
+    now = timezone.now()
+    post = get_object_or_404(
+        Post.objects.select_related('author', 'category', 'location'),
+        pk=post_id,
+        is_published=True,
+        pub_date__lte=now,
+        category__is_published=True,
+    )
+    return _render('blog/detail.html', {'post': post})

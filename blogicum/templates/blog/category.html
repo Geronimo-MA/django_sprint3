@@ -1,14 +1,13 @@
-{% extends "base.html" %}
-{% block title %}
-  Публикации в категории «{{ category.title }}»
-{% endblock %}
-{% block content %}
-<h1>Публикации в категории «{{ category.title }}»</h1>
-<p class="mb-5">{{ category.description }}</p>
-{% for post in post_list %}
-  <article class="mb-5">  
-    {% include "includes/post_card.html" %}
-  </article>   
-{% endfor %}
+<!doctype html>
+<html lang="ru">
+  <body>
+    <h1>{{ category.title }}</h1>
+    <div>{{ category.slug }}</div>
 
-{% endblock %}
+    {% for post in posts %}
+      <h2>{{ post.title }}</h2>
+      <div>{{ post.location.name|default:"Планета Земля" }}</div>
+      <a href="{% url 'blog:post_detail' post.id %}">Подробнее</a>
+    {% endfor %}
+  </body>
+</html>
